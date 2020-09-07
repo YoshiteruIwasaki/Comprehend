@@ -13,8 +13,19 @@ public class ComprehendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ComprehendApplication.class, args);
 	}
+
+	@GetMapping("/")
+	public String home() {
+		return "New Application";
+	}
+
+	@GetMapping("/error")
+	public String error() {
+		return "エラーページ";
+	}
+
 	@GetMapping("/hello")
 	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-	return String.format("Hello %s!", name);
+		return String.format("Hello %s!", name);
 	}
 }
