@@ -1,0 +1,16 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{commons/layout}">
+<head>
+</head>
+<body>
+	<div layout:fragment="contents">
+		<div class="ui container">
+			<h1>入力された文字</h1>
+			<div class="ui inverted segment" th:text="${sentence}"></div>
+		</div>
+	</div>
+</body>
+</html>
