@@ -7,9 +7,24 @@
 </head>
 <body>
 	<div layout:fragment="contents">
-		<div class="ui container">
-			<h1>入力された文字</h1>
-			<div class="ui inverted segment" th:text="${sentence}"></div>
+		<div class="ui main text container">
+			<h1>結果</h1>
+
+			<div class="ui message">
+				<div class="header">入力された文字</div>
+				<p th:utext="${#strings.replace( #strings.escapeXml( sentence ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}" ></p>
+			</div>
+
+			<div class="ui info message">
+				<div class="header" style="margin-bottom: 1em">分析結果</div>
+
+				<div class="ui massive label"
+					th:classappend="${(isPositive ? 'green' : '') + (isNegative ? ' red' : '') + (isNeutral ? ' blue' : '')}">
+					<p th:text="${sentiment}"></p>
+				</div>
+				<p th:text="${score}"></p>
+			</div>
+
 		</div>
 	</div>
 </body>
