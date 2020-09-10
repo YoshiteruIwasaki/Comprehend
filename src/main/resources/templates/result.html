@@ -4,6 +4,11 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{commons/layout}">
 <head>
+<script>
+	$(function() {
+		$('.ui.rating').rating();
+	});
+</script>
 </head>
 <body>
 	<div layout:fragment="contents">
@@ -12,7 +17,8 @@
 
 			<div class="ui message">
 				<div class="header">入力された文字</div>
-				<p th:utext="${#strings.replace( #strings.escapeXml( sentence ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}" ></p>
+				<p
+					th:utext="${#strings.replace( #strings.escapeXml( sentence ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}"></p>
 			</div>
 
 			<div class="ui info message">
@@ -22,7 +28,13 @@
 					th:classappend="${(isPositive ? 'green' : '') + (isNegative ? ' red' : '') + (isNeutral ? ' blue' : '')}">
 					<p th:text="${sentiment}"></p>
 				</div>
-				<p th:text="${score}"></p>
+				<div style="margin-bottom: 1em; margin-top: 1em">判定結果の確実性</div>
+				<div class="ui yellow disabled rating" data-icon="star"
+					th:data-rating="${rating}" data-max-rating="10"></div>
+				<div class="ui label">
+					スコア
+					<div class="detail" th:text="${score}"></div>
+				</div>
 			</div>
 
 		</div>

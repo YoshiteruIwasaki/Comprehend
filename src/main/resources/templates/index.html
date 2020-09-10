@@ -30,10 +30,11 @@
 					th:object="${userRequest}" method="post">
 					<div class="ui stacked segment">
 						<div class="field">
-							<textarea placeholder="解析したいテキストを入力してください。"
+							<textarea placeholder="分析したいテキストを入力してください。"
 								th:field="*{sentence}">></textarea>
-						</div>
+						</div><div class="ui bottom attached label">感情分析には <a href="https://api.ce-cotoha.com/contents/index.html" rel=”nofollow”>COTOHA API</a> を利用しています。</div>
 
+<!--
 						<div class="inline field">
 							<div class="ui checkbox">
 								<input type="checkbox" class="hidden"> <label>Google</label>
@@ -48,9 +49,9 @@
 								<input type="checkbox" class="hidden"> <label>Yahoo</label>
 							</div>
 						</div>
-
+ -->
 					</div>
-					<div class="ui fluid large teal submit button">解析する</div>
+					<div class="ui fluid large teal submit button">分析する</div>
 
 
 					<div class="ui error message"></div>

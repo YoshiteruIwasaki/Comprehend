@@ -69,7 +69,6 @@ public class ComprehendApplication {
 
 		CotohaAccessTokenResponseResource cotohaAccessTokenResponseResource = restTemplate
 				.postForObject(ACCESS_TOKEN_URL, request, CotohaAccessTokenResponseResource.class);
-		System.out.println(cotohaAccessTokenResponseResource);
 
 		RequestEntity<UserRequest> requestEntity = RequestEntity
 				.post(new URI(API_URL + SENTIMENT_URL))
@@ -91,6 +90,8 @@ public class ComprehendApplication {
 				"Neutral".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
 
 		model.addAttribute("score", responseEntity.getBody().getResult().getScore());
+
+		model.addAttribute("rating", Math.round(responseEntity.getBody().getResult().getScore() * 10));
 
 		return "result";
 
