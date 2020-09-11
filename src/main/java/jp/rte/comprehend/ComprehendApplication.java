@@ -119,7 +119,8 @@ public class ComprehendApplication {
 			model.addAttribute("scoreGNL", sentiment.getScore());
 			model.addAttribute("magnitudeGNL", sentiment.getMagnitude());
 		} catch (IOException e) {
-			System.out.printf(e.getMessage());
+			System.out.println("Hello, logs!");
+			System.out.println(e.getMessage());
 		}
 
 		return "result";
