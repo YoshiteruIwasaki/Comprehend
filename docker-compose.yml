@@ -11,7 +11,8 @@ services:
  #     - "5005:5005"
     env_file:
       - ./docker/local.env
- #   environment:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/Comprehend-4b5dd6bf031a.json"
  #     JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n"
  #     COTOHA_CLIENT_ID:
  #     COTOHA_CLIENT_SECRET:

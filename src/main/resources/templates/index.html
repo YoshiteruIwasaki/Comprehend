@@ -32,9 +32,15 @@
 						<div class="field">
 							<textarea placeholder="分析したいテキストを入力してください。"
 								th:field="*{sentence}">></textarea>
-						</div><div class="ui bottom attached label">感情分析には <a href="https://api.ce-cotoha.com/contents/index.html" rel=”nofollow”>COTOHA API</a> を利用しています。</div>
+						</div>
+						<div class="ui bottom attached label" style="line-height: 1.5em">
+							感情分析には <a href="https://api.ce-cotoha.com/contents/index.html"
+								rel=”nofollow”>COTOHA API</a> , <a
+								href="https://cloud.google.com/natural-language?hl=ja"
+								rel=”nofollow”>Google Natural Language API</a> を利用しています。
+						</div>
 
-<!--
+						<!--
 						<div class="inline field">
 							<div class="ui checkbox">
 								<input type="checkbox" class="hidden"> <label>Google</label>

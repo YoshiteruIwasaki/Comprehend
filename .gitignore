@@ -34,3 +34,6 @@ build/
 
 # Docker
 /docker/local.env
+
+# credential
+Comprehend-4b5dd6bf031a.json

@@ -1,5 +1,6 @@
 package jp.rte.comprehend;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -14,6 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
+
+import com.google.cloud.language.v1.Document;
+import com.google.cloud.language.v1.Document.Type;
+import com.google.cloud.language.v1.LanguageServiceClient;
+import com.google.cloud.language.v1.Sentiment;
 
 import jp.rte.comprehend.dto.CotohaAccessTokenRequest;
 import jp.rte.comprehend.dto.CotohaAccessTokenResponseResource;
@@ -92,6 +98,29 @@ public class ComprehendApplication {
 		model.addAttribute("score", responseEntity.getBody().getResult().getScore());
 
 		model.addAttribute("rating", Math.round(responseEntity.getBody().getResult().getScore() * 10));
+
+		// Instantiates a client
+		try (LanguageServiceClient language = LanguageServiceClient.create()) {
+
+			Document doc = Document.newBuilder().setContent(userRequest.getSentence()).setType(Type.PLAIN_TEXT).build();
+
+			// Detects the sentiment of the text
+			Sentiment sentiment = language.analyzeSentiment(doc).getDocumentSentiment();
+
+			model.addAttribute("isGNLPositive",
+					sentiment.getScore() > 0 ? true : false);
+			model.addAttribute("isGNLNegative",
+					sentiment.getScore() < 0 ? true : false);
+			model.addAttribute("isGNLNeutral",
+					sentiment.getScore() == 0 ? true : false);
+			model.addAttribute("sentimentGNL",
+					sentiment.getScore() > 0 ? "Positive" : sentiment.getScore() < 0 ? "Negative" : "Neutral");
+
+			model.addAttribute("scoreGNL", sentiment.getScore());
+			model.addAttribute("magnitudeGNL", sentiment.getMagnitude());
+		} catch (IOException e) {
+			System.out.printf(e.getMessage());
+		}
 
 		return "result";
 
