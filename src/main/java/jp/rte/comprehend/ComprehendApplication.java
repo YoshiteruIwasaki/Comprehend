@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,11 +19,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
+import com.azure.ai.textanalytics.TextAnalyticsClient;
 import com.google.cloud.language.v1.Document;
 import com.google.cloud.language.v1.Document.Type;
 import com.google.cloud.language.v1.LanguageServiceClient;
 import com.google.cloud.language.v1.Sentiment;
 
+import jp.rte.comprehend.dto.AzureResponseResource;
 import jp.rte.comprehend.dto.CotohaAccessTokenRequest;
 import jp.rte.comprehend.dto.CotohaAccessTokenResponseResource;
 import jp.rte.comprehend.dto.CotohaResponseResource;
@@ -30,17 +35,23 @@ import jp.rte.comprehend.dto.UserRequest;
 @Controller
 public class ComprehendApplication {
 
-	String ACCESS_TOKEN_URL = "https://api.ce-cotoha.com/v1/oauth/accesstokens";
+	@Value("${COTOHA.ACCESS.TOKEN.URL}")
+	private String COTOHA_ACCESS_TOKEN_URL;
 
-	String API_URL = "https://api.ce-cotoha.com/api/dev/";
-
-	String SENTIMENT_URL = "nlp/v1/sentiment";
+	@Value("${COTOHA.API.ENDPOINT}")
+	private String COTOHA_API_ENDPOINT;
 
 	@Value("${COTOHA.CLIENT.ID}")
-	private String CLIENT_ID;
+	private String COTOHA_CLIENT_ID;
 
 	@Value("${COTOHA.CLIENT.SECRET}")
-	private String CLIENT_SECRET;
+	private String COTOHA_CLIENT_SECRET;
+
+	@Value("${AZURE.API.KEY}")
+	private String AZURE_API_KEY;
+
+	@Value("${AZURE.API.ENDPOINT}")
+	private String AZURE_API_ENDPOINT;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ComprehendApplication.class, args);
@@ -65,41 +76,52 @@ public class ComprehendApplication {
 		// userRequestに入力フォームの内容が格納されている
 		model.addAttribute("title", "日本語感情分析ツール");
 
-		//access tokenの取得
 
-		CotohaAccessTokenRequest request = new CotohaAccessTokenRequest();
-		request.setGrantType("client_credentials");
-		request.setClientId(CLIENT_ID);
-		request.setClientSecret(CLIENT_SECRET);
-		RestTemplate restTemplate = new RestTemplate();
+		//COTOHA API
+		try {
+			//access tokenの取得
+			CotohaAccessTokenRequest request = new CotohaAccessTokenRequest();
+			request.setGrantType("client_credentials");
+			request.setClientId(COTOHA_CLIENT_ID);
+			request.setClientSecret(COTOHA_CLIENT_SECRET);
+			RestTemplate restTemplate = new RestTemplate();
 
-		CotohaAccessTokenResponseResource cotohaAccessTokenResponseResource = restTemplate
-				.postForObject(ACCESS_TOKEN_URL, request, CotohaAccessTokenResponseResource.class);
+			// create headers
+			HttpHeaders headers = new HttpHeaders();
+			// set `content-type` header
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<CotohaAccessTokenRequest> entity = new HttpEntity<>(request, headers);
+			CotohaAccessTokenResponseResource cotohaAccessTokenResponseResource = restTemplate
+					.postForObject(COTOHA_ACCESS_TOKEN_URL, entity, CotohaAccessTokenResponseResource.class);
 
-		RequestEntity<UserRequest> requestEntity = RequestEntity
-				.post(new URI(API_URL + SENTIMENT_URL))
-				.header("Authorization", "Bearer " + cotohaAccessTokenResponseResource.getAccess_token())
-				.body(userRequest);
+			RequestEntity<UserRequest> requestEntity = RequestEntity
+					.post(new URI(COTOHA_API_ENDPOINT))
+					.header("Authorization", "Bearer " + cotohaAccessTokenResponseResource.getAccess_token())
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(userRequest);
 
-		ResponseEntity<CotohaResponseResource> responseEntity = restTemplate.exchange(requestEntity,
-				CotohaResponseResource.class);
+			ResponseEntity<CotohaResponseResource> responseEntity = restTemplate.exchange(requestEntity,
+					CotohaResponseResource.class);
 
-		model.addAttribute("sentence", userRequest.getSentence());
-		model.addAttribute("message", responseEntity.getBody().getMessage());
-		model.addAttribute("status", responseEntity.getBody().getStatus());
-		model.addAttribute("sentiment", responseEntity.getBody().getResult().getSentiment());
-		model.addAttribute("isPositive",
-				"Positive".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
-		model.addAttribute("isNegative",
-				"Negative".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
-		model.addAttribute("isNeutral",
-				"Neutral".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
+			model.addAttribute("sentence", userRequest.getSentence());
+			model.addAttribute("message", responseEntity.getBody().getMessage());
+			model.addAttribute("status", responseEntity.getBody().getStatus());
+			model.addAttribute("sentiment", responseEntity.getBody().getResult().getSentiment());
+			model.addAttribute("isPositive",
+					"Positive".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
+			model.addAttribute("isNegative",
+					"Negative".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
+			model.addAttribute("isNeutral",
+					"Neutral".equals(responseEntity.getBody().getResult().getSentiment()) ? true : false);
 
-		model.addAttribute("score", responseEntity.getBody().getResult().getScore());
+			model.addAttribute("score", responseEntity.getBody().getResult().getScore());
 
-		model.addAttribute("rating", Math.round(responseEntity.getBody().getResult().getScore() * 10));
+			model.addAttribute("rating", Math.round(responseEntity.getBody().getResult().getScore() * 10));
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 
-		// Instantiates a client
+		//GOOGLE Natural Language API
 		try (LanguageServiceClient language = LanguageServiceClient.create()) {
 
 			Document doc = Document.newBuilder().setContent(userRequest.getSentence()).setType(Type.PLAIN_TEXT).build();
@@ -119,10 +141,36 @@ public class ComprehendApplication {
 			model.addAttribute("scoreGNL", sentiment.getScore());
 			model.addAttribute("magnitudeGNL", sentiment.getMagnitude());
 		} catch (IOException e) {
-			System.out.println("Hello, logs!");
 			System.out.println(e.getMessage());
 		}
 
+		// AZURE Text Analytics API
+		try {
+			//You will create these methods later in the quickstart.
+			TextAnalyticsClient client = AzureTextAnalytics.authenticateClient(AZURE_API_KEY, AZURE_API_ENDPOINT);
+			AzureResponseResource azureResponseResource = AzureTextAnalytics.sentimentAnalysis(client,
+					userRequest.getSentence());
+
+			model.addAttribute("isAzurePositive",
+					azureResponseResource.getPositive() > azureResponseResource.getNeutral()
+							&& azureResponseResource.getPositive() > azureResponseResource.getNegative() ? true
+									: false);
+			model.addAttribute("isAzureNegative",
+					azureResponseResource.getNegative() > azureResponseResource.getPositive()
+							&& azureResponseResource.getNegative() > azureResponseResource.getNeutral() ? true : false);
+			model.addAttribute("isAzureNeutral",
+					azureResponseResource.getNeutral() > azureResponseResource.getPositive()
+							&& azureResponseResource.getNeutral() > azureResponseResource.getNegative() ? true : false);
+			model.addAttribute("sentimentAzure", azureResponseResource.getSentiment().toString());
+
+
+			model.addAttribute("scoreAzurePositive", azureResponseResource.getPositive());
+			model.addAttribute("scoreAzureNeutral", azureResponseResource.getNeutral());
+			model.addAttribute("scoreAzureNegative", azureResponseResource.getNegative());
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		return "result";
 
 	}

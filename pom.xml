@@ -72,6 +72,11 @@
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-language</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-ai-textanalytics</artifactId>
+			<version>5.0.0</version>
+		</dependency>
 
 	</dependencies>
 

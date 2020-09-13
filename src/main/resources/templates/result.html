@@ -57,6 +57,31 @@
 					</div>
 				</div>
 			</div>
+
+			<div class="ui info message">
+				<div class="header" style="margin-bottom: 1em">Azure Text
+					Analytics API 分析結果</div>
+
+				<div class="ui massive label"
+					th:classappend="${(isAzurePositive ? 'green' : '') + (isAzureNegative ? ' red' : '') + (isAzureNeutral ? ' blue' : '')}">
+					<p th:text="${sentimentAzure}"></p>
+				</div>
+				<div style="margin-bottom: 1em; margin-top: 1em">
+					<div class="ui label">
+						Positiveスコア
+						<div class="detail" th:text="${scoreAzurePositive}"></div>
+					</div>
+					<div class="ui label">
+						Neutralスコア
+						<div class="detail" th:text="${scoreAzureNeutral}"></div>
+					</div>
+					<div class="ui label">
+						Negativeスコア
+						<div class="detail" th:text="${scoreAzureNegative}"></div>
+					</div>
+				</div>
+			</div>
+
 		</div>
 	</div>
 </body>
