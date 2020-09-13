@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
+import com.amazonaws.services.comprehend.model.DetectSentimentResult;
 import com.azure.ai.textanalytics.TextAnalyticsClient;
+import com.azure.ai.textanalytics.models.TextSentiment;
 import com.google.cloud.language.v1.Document;
 import com.google.cloud.language.v1.Document.Type;
 import com.google.cloud.language.v1.LanguageServiceClient;
@@ -75,7 +77,6 @@ public class ComprehendApplication {
 	public String analyze(@ModelAttribute UserRequest userRequest, Model model) throws URISyntaxException {
 		// userRequestに入力フォームの内容が格納されている
 		model.addAttribute("title", "日本語感情分析ツール");
-
 
 		//COTOHA API
 		try {
@@ -152,22 +153,46 @@ public class ComprehendApplication {
 					userRequest.getSentence());
 
 			model.addAttribute("isAzurePositive",
-					azureResponseResource.getPositive() > azureResponseResource.getNeutral()
-							&& azureResponseResource.getPositive() > azureResponseResource.getNegative() ? true
-									: false);
+					TextSentiment.POSITIVE.toString().equals(azureResponseResource.getSentiment().toString())
+							? true
+							: false);
 			model.addAttribute("isAzureNegative",
-					azureResponseResource.getNegative() > azureResponseResource.getPositive()
-							&& azureResponseResource.getNegative() > azureResponseResource.getNeutral() ? true : false);
+					TextSentiment.NEGATIVE.toString().equals(azureResponseResource.getSentiment().toString())
+					? true
+					: false);
 			model.addAttribute("isAzureNeutral",
-					azureResponseResource.getNeutral() > azureResponseResource.getPositive()
-							&& azureResponseResource.getNeutral() > azureResponseResource.getNegative() ? true : false);
+					TextSentiment.NEUTRAL.toString().equals(azureResponseResource.getSentiment().toString())
+					? true
+					: false);
 			model.addAttribute("sentimentAzure", azureResponseResource.getSentiment().toString());
-
 
 			model.addAttribute("scoreAzurePositive", azureResponseResource.getPositive());
 			model.addAttribute("scoreAzureNeutral", azureResponseResource.getNeutral());
 			model.addAttribute("scoreAzureNegative", azureResponseResource.getNegative());
 
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		// Amazon Comprehend API
+		try {
+			DetectSentimentResult comprehend = AmazonComprehendClient.comprehend(userRequest.getSentence());
+
+			model.addAttribute("isAmazonPositive",
+					"POSITIVE".equals(comprehend.getSentiment()) ? true : false);
+			model.addAttribute("isAmazonNegative",
+					"NEGATIVE".equals(comprehend.getSentiment()) ? true : false);
+			model.addAttribute("isAmazonNeutral",
+					"NEUTRAL".equals(comprehend.getSentiment()) ? true : false);
+			model.addAttribute("isAmazonMixed",
+					"MIXED".equals(comprehend.getSentiment()) ? true : false);
+
+			model.addAttribute("sentimentAmazon", comprehend.getSentiment());
+
+			model.addAttribute("scoreAmazonPositive", comprehend.getSentimentScore().getPositive());
+			model.addAttribute("scoreAmazonNeutral", comprehend.getSentimentScore().getNeutral());
+			model.addAttribute("scoreAmazonNegative", comprehend.getSentimentScore().getNegative());
+			model.addAttribute("scoreAmazonMixed", comprehend.getSentimentScore().getMixed());
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

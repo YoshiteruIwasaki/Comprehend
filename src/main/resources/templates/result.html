@@ -9,6 +9,20 @@
 		$('.ui.rating').rating();
 	});
 </script>
+<style type="text/css">
+.my-label {
+	display: block !important;
+	text-align: center;
+}
+
+.my-label-text {
+	text-transform: uppercase;
+}
+
+.my-score {
+	margin-top: 1em !important;
+}
+</style>
 </head>
 <body>
 	<div layout:fragment="contents">
@@ -20,68 +34,97 @@
 				<p
 					th:utext="${#strings.replace( #strings.escapeXml( sentence ),T(java.lang.System).getProperty('line.separator'),'&lt;br /&gt;')}"></p>
 			</div>
+			<div class="ui grid">
+				<div class="eight wide column">
+					<div class="ui info message">
+						<div class="header" style="margin-bottom: 1em">COTOHA API
+							分析結果</div>
 
-			<div class="ui info message">
-				<div class="header" style="margin-bottom: 1em">COTOHA API 分析結果</div>
-
-				<div class="ui massive label"
-					th:classappend="${(isPositive ? 'green' : '') + (isNegative ? ' red' : '') + (isNeutral ? ' blue' : '')}">
-					<p th:text="${sentiment}"></p>
-				</div>
-				<div style="margin-bottom: 1em; margin-top: 1em">
-					<div class="ui label">
-						判定結果の確実性
-						<div class="detail" th:text="${score}"></div>
-					</div>
-					<div class="ui yellow disabled rating" data-icon="star"
-						th:data-rating="${rating}" data-max-rating="10"></div>
-				</div>
-			</div>
-
-			<div class="ui info message">
-				<div class="header" style="margin-bottom: 1em">Natural
-					Language API 分析結果</div>
-
-				<div class="ui massive label"
-					th:classappend="${(isGNLPositive ? 'green' : '') + (isGNLNegative ? ' red' : '') + (isGNLNeutral ? ' blue' : '')}">
-					<p th:text="${sentimentGNL}"></p>
-				</div>
-				<div style="margin-bottom: 1em; margin-top: 1em">
-					<div class="ui label">
-						スコア
-						<div class="detail" th:text="${scoreGNL}"></div>
-					</div>
-					<div class="ui label">
-						感情の振れ幅
-						<div class="detail" th:text="${magnitudeGNL}"></div>
+						<div class="ui massive label my-label"
+							th:classappend="${(isPositive ? 'green' : '') + (isNegative ? 'red' : '') + (isNeutral ? 'blue' : '')}">
+							<p class="my-label-text" th:text="${sentiment}"></p>
+						</div>
+						<div class="ui label my-score">
+							判定結果の確実性
+							<div class="detail" th:text="${score}"></div>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="ui info message">
-				<div class="header" style="margin-bottom: 1em">Azure Text
-					Analytics API 分析結果</div>
+				<div class="eight wide column">
+					<div class="ui info message">
+						<div class="header" style="margin-bottom: 1em">Natural
+							Language API 分析結果</div>
 
-				<div class="ui massive label"
-					th:classappend="${(isAzurePositive ? 'green' : '') + (isAzureNegative ? ' red' : '') + (isAzureNeutral ? ' blue' : '')}">
-					<p th:text="${sentimentAzure}"></p>
-				</div>
-				<div style="margin-bottom: 1em; margin-top: 1em">
-					<div class="ui label">
-						Positiveスコア
-						<div class="detail" th:text="${scoreAzurePositive}"></div>
-					</div>
-					<div class="ui label">
-						Neutralスコア
-						<div class="detail" th:text="${scoreAzureNeutral}"></div>
-					</div>
-					<div class="ui label">
-						Negativeスコア
-						<div class="detail" th:text="${scoreAzureNegative}"></div>
+						<div class="ui massive label my-label"
+							th:classappend="${(isGNLPositive ? 'green' : '') + (isGNLNegative ? 'red' : '') + (isGNLNeutral ? 'blue' : '')}">
+							<p class="my-label-text" th:text="${sentimentGNL}"></p>
+						</div>
+						<div class="ui label my-score">
+							スコア
+							<div class="detail" th:text="${scoreGNL}"></div>
+						</div>
+						<div class="ui label my-score">
+							感情の振れ幅
+							<div class="detail" th:text="${magnitudeGNL}"></div>
+						</div>
 					</div>
 				</div>
 			</div>
 
+			<div class="ui grid">
+				<div class="eight wide column">
+					<div class="ui info message">
+						<div class="header" style="margin-bottom: 1em">Azure Text
+							Analytics API 分析結果</div>
+
+						<div class="ui massive label my-label"
+							th:classappend="${(isAzurePositive ? 'green' : '') + (isAzureNegative ? 'red' : '') + (isAzureNeutral ? 'blue' : '')}">
+							<p class="my-label-text" th:text="${sentimentAzure}"></p>
+						</div>
+						<div class="ui label my-score">
+							Positive
+							<div class="detail" th:text="${scoreAzurePositive}"></div>
+						</div>
+						<div class="ui label my-score">
+							Neutral
+							<div class="detail" th:text="${scoreAzureNeutral}"></div>
+						</div>
+						<div class="ui label my-score">
+							Negative
+							<div class="detail" th:text="${scoreAzureNegative}"></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="eight wide column">
+					<div class="ui info message">
+						<div class="header" style="margin-bottom: 1em">Amazon
+							Comprehend API 分析結果</div>
+
+						<div class="ui massive label my-label"
+							th:classappend="${(isAmazonPositive ? 'green' : '') + (isAmazonNegative ? 'red' : '') + (isAmazonNeutral ? 'blue' : '') + (isAmazonMixed ? 'brown' : '')}">
+							<p class="my-label-text" th:text="${sentimentAmazon}"></p>
+						</div>
+						<div class="ui label my-score">
+							Positive
+							<div class="detail" th:text="${scoreAmazonPositive}"></div>
+						</div>
+						<div class="ui label my-score">
+							Neutral
+							<div class="detail" th:text="${scoreAmazonNeutral}"></div>
+						</div>
+						<div class="ui label my-score">
+							Negative
+							<div class="detail" th:text="${scoreAmazonNegative}"></div>
+						</div>
+						<div class="ui label my-score">
+							Mixed
+							<div class="detail" th:text="${scoreAmazonMixed}"></div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
